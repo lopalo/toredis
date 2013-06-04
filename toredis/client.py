@@ -39,7 +39,7 @@ class Client(RedisCommandsMixin):
         self.reader = None
         self.callbacks = deque()
 
-        self._sub_callback = False
+        self._sub_callback = None
 
     def connect(self, host='localhost', port=6379, callback=None):
         """
@@ -176,7 +176,7 @@ class Client(RedisCommandsMixin):
         resp = self.reader.gets()
 
         while resp is not False:
-            if self._sub_callback:
+            if self._sub_callback is not None:
                 try:
                     self._sub_callback(resp)
                 except:
@@ -224,4 +224,44 @@ class Client(RedisCommandsMixin):
         self.reader = hiredis.Reader()
         self._sub_callback = None
 
+
+class ClientPool(RedisCommandsMixin):
+    #TODO: tests
+
+    client_cls = Client
+
+    def __init__(self, db=0, password=None, host='localhost', port=6379,
+                    unix_socket=None, max_clients=100, io_loop=None):
+        self._db = db
+        self._password = password
+        self._host = host
+        self._port = port
+        self._unix_socket = unix_socket
+        self._max_clients = max_clients
+        self._pool = []
+        self._io_loop = io_loop or IOLoop.instance()
+
+    def send_message(self, args, callback=None):
+        self.get_client().send_message(args, callback)
+
+    def make_client(self):
+        cli = self.client_cls(self._io_loop)
+        self._pool.insert(0, cli)
+        if self._unix_socket is not None:
+            cli.connect_usocket(self._unix_socket)
+        else:
+            cli.connect(self._host, self._port)
+        if self._password is not None:
+            cli.auth(self._password)
+        cli.select(self._db)
+        return cli
+
+    def get_client(self):
+        if not self._pool:
+            return self.make_client()
+        self._pool.sort(key=lambda c: len(c.callbacks))
+        cli = self._pool[0]
+        if not cli.is_idle() and len(self._pool) < self._max_clients:
+            return self.make_client()
+        return cli
 
