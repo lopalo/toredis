@@ -15,6 +15,12 @@ from toredis.commands import RedisCommandsMixin
 logger = logging.getLogger(__name__)
 
 
+try:
+    string = unicode
+except NameError:
+    string = str
+
+
 class Client(RedisCommandsMixin):
     """
         Redis client class
@@ -107,9 +113,10 @@ class Client(RedisCommandsMixin):
         l = "*%d" % len(args)
         lines = [l.encode('utf-8')]
         for arg in args:
-            if not isinstance(arg, basestring):
-                arg = str(arg)
-            arg = arg.encode('utf-8')
+            if not isinstance(arg, (bytes, string)):
+                arg = string(arg)
+            if not isinstance(arg, bytes):
+                arg = arg.encode('utf-8')
             l = "$%d" % len(arg)
             lines.append(l.encode('utf-8'))
             lines.append(arg)
@@ -216,3 +223,5 @@ class Client(RedisCommandsMixin):
     def _reset(self):
         self.reader = hiredis.Reader()
         self._sub_callback = None
+
+

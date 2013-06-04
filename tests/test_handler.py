@@ -17,8 +17,8 @@ class Handler(RequestHandler):
     def on_receive(self, msg):
         """ New message, close out connection. """
         msg_type, msg_channel, msg = msg
-        if msg_type == "message":
-            self.finish({"message": msg})
+        if msg_type.decode('utf-8') == "message":
+            self.finish({"message": msg.decode('utf-8')})
 
 
 class TestRedis(AsyncHTTPTestCase):

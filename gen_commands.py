@@ -130,7 +130,7 @@ def parse_arguments(command, arguments):
             elif len(arg['name']) == 1:
                 name = '%ss' % argname(arg['name'][0])
                 args.append(name)
-                code.append('if isinstance(%s, basestring):' % name)
+                code.append('if not isinstance(%s, (list, tuple)):' % name)
                 code.append('    args.append(%s)' % name)
                 code.append('else:')
                 code.append('    args.extend(%s)' % name)
@@ -151,7 +151,7 @@ def parse_arguments(command, arguments):
                 args.append('%s=[]' % name)
             else:
                 args.append(name)
-            code.append('if isinstance(%s, basestring):' % name)
+            code.append('if not isinstance(%s, (list, tuple)):' % name)
             code.append('    args.append(%s)' % name)
             code.append('else:')
             code.append('    args.extend(%s)' % name)
