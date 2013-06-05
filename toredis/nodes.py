@@ -1,21 +1,21 @@
 import zlib
 
-from bisect import bisect
+from bisect import bisect_left
 from functools import partial
 from tornado.gen import coroutine
 
-from toredis.client import ClientPool as BasicClientPool
+from toredis.client import ClientPool
 from toredis.commands_future import RedisCommandsFutureMixin
 
 
-class ClientPool(RedisCommandsFutureMixin, BasicClientPool):
+class ClientPoolFuture(RedisCommandsFutureMixin, ClientPool):
     pass
 
 
 class RedisNodes(object):
-    pool_cls = ClientPool # should be subclass of ClientPool
+    pool_cls = ClientPoolFuture # should be a subclass of ClientPoolFuture
 
-    def __init__(self, *, nodes, default_max_clients=100,
+    def __init__(self, nodes, default_max_clients=100,
                                  default_replicas=100):
         self._hash_to_nodeinfo = {}
         self._hash_to_client = {}
@@ -42,7 +42,7 @@ class RedisNodes(object):
 
     def _get_node_hash(self, key):
         _hash = self.hash_func(key)
-        idx = bisect(self._hash_list, _hash)
+        idx = bisect_left(self._hash_list, _hash)
         if idx == len(self._hash_list):
             idx = 0
         return self._hash_list[idx]
