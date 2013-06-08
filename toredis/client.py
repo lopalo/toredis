@@ -226,7 +226,6 @@ class Client(RedisCommandsMixin):
 
 
 class ClientPool(RedisCommandsMixin):
-    #TODO: tests
 
     client_cls = Client
 

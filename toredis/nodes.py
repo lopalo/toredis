@@ -1,19 +1,10 @@
 import zlib
-
 from bisect import bisect_left
-from functools import partial
-from tornado.gen import coroutine
-
 from toredis.client import ClientPool
-from toredis.commands_future import RedisCommandsFutureMixin
-
-
-class ClientPoolFuture(RedisCommandsFutureMixin, ClientPool):
-    pass
 
 
 class RedisNodes(object):
-    pool_cls = ClientPoolFuture # should be a subclass of ClientPoolFuture
+    pool_cls = ClientPool # should be a subclass of ClientPool
 
     def __init__(self, nodes, default_max_clients=100,
                                  default_replicas=100):
@@ -57,11 +48,4 @@ class RedisNodes(object):
 
     def __getitem__(self, key):
         return self.get_client(key)
-
-    @coroutine
-    def check_nodes(self):
-        """ Checks connections with all nodes and setups db_name """
-
-        for info, cli in self.nodes:
-            yield cli.setnx('db_name', info['name'])
 
