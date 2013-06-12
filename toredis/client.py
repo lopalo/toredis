@@ -2,6 +2,7 @@ import logging
 import socket
 
 from collections import deque
+from functools import wraps
 
 import hiredis
 
@@ -99,9 +100,15 @@ class Client(RedisCommandsMixin):
 
         # Send command
         self._stream.write(self.format_message(args))
+        cb = callback
         if callback is not None:
-            callback = stack_context.wrap(callback)
-        self.callbacks.append(callback)
+            @wraps(callback)
+            def cb(resp):
+                if isinstance(resp, Exception):
+                    raise resp
+                callback(resp)
+            cb = stack_context.wrap(cb)
+        self.callbacks.append(cb)
 
     def format_message(self, args):
         """

@@ -4,6 +4,10 @@ from toredis.client import ClientPool
 
 
 class RedisNodes(object):
+    """
+    Change of almost all parameters of nodes requires rebalancing of keys.
+    """
+
     pool_cls = ClientPool # should be a subclass of ClientPool
 
     def __init__(self, nodes, default_max_clients=100,
