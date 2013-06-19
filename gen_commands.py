@@ -23,7 +23,11 @@ def argname(name):
 def parse_arguments(command, arguments):
     args = ['self']
     doc = []
-    code = ['args = ["%s"]' % command]
+    command = str(command)
+    if ' ' not in command:
+        code = ['args = ["%s"]' % command]
+    else:
+        code = ['args = %s' % command.split(' ')]
 
     for arg in arguments:
         # Sub-command parsing
@@ -100,7 +104,10 @@ def parse_arguments(command, arguments):
                 "type": "key",
                 "multiple": True
             }
-            code.append('args.append(len(keys))')
+            code.append('if not isinstance(keys, (list, tuple)):')
+            code.append('    args.append(1)')
+            code.append('else:')
+            code.append('    args.append(len(keys))')
         # If name is list
         elif isinstance(arg['name'], list):
             # makes no sense for single pairs

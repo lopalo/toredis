@@ -152,7 +152,7 @@ class RedisCommandsMixin(object):
         ----------
         O(N) where N is the number of client connections
         """
-        args = ["CLIENT KILL"]
+        args = ['CLIENT', 'KILL']
         args.append(ip_port)
         self.send_message(args, callback)
 
@@ -172,7 +172,7 @@ class RedisCommandsMixin(object):
 
             :param parameter:
         """
-        args = ["CONFIG GET"]
+        args = ['CONFIG', 'GET']
         args.append(parameter)
         self.send_message(args, callback)
 
@@ -193,7 +193,7 @@ class RedisCommandsMixin(object):
             :param parameter:
             :param value:
         """
-        args = ["CONFIG SET"]
+        args = ['CONFIG', 'SET']
         args.append(parameter)
         args.append(value)
         self.send_message(args, callback)
@@ -210,7 +210,7 @@ class RedisCommandsMixin(object):
 
             :param key:
         """
-        args = ["DEBUG OBJECT"]
+        args = ['DEBUG', 'OBJECT']
         args.append(key)
         self.send_message(args, callback)
 
@@ -321,7 +321,10 @@ class RedisCommandsMixin(object):
         """
         args = ["EVAL"]
         args.append(script)
-        args.append(len(keys))
+        if not isinstance(keys, (list, tuple)):
+            args.append(1)
+        else:
+            args.append(len(keys))
         if not isinstance(keys, (list, tuple)):
             args.append(keys)
         else:
@@ -348,7 +351,10 @@ class RedisCommandsMixin(object):
         """
         args = ["EVALSHA"]
         args.append(sha1)
-        args.append(len(keys))
+        if not isinstance(keys, (list, tuple)):
+            args.append(1)
+        else:
+            args.append(len(keys))
         if not isinstance(keys, (list, tuple)):
             args.append(keys)
         else:
@@ -1421,7 +1427,7 @@ class RedisCommandsMixin(object):
         O(N) with N being the number of scripts to check (so checking a single
         script is an O(1) operation).
         """
-        args = ["SCRIPT EXISTS"]
+        args = ['SCRIPT', 'EXISTS']
         if not isinstance(scripts, (list, tuple)):
             args.append(scripts)
         else:
@@ -1458,7 +1464,7 @@ class RedisCommandsMixin(object):
         ----------
         O(N) with N being the length in bytes of the script body.
         """
-        args = ["SCRIPT LOAD"]
+        args = ['SCRIPT', 'LOAD']
         args.append(script)
         self.send_message(args, callback)
 
@@ -2066,7 +2072,10 @@ class RedisCommandsMixin(object):
         """
         args = ["ZINTERSTORE"]
         args.append(destination)
-        args.append(len(keys))
+        if not isinstance(keys, (list, tuple)):
+            args.append(1)
+        else:
+            args.append(len(keys))
         if not isinstance(keys, (list, tuple)):
             args.append(keys)
         else:
@@ -2311,7 +2320,10 @@ class RedisCommandsMixin(object):
         """
         args = ["ZUNIONSTORE"]
         args.append(destination)
-        args.append(len(keys))
+        if not isinstance(keys, (list, tuple)):
+            args.append(1)
+        else:
+            args.append(len(keys))
         if not isinstance(keys, (list, tuple)):
             args.append(keys)
         else:

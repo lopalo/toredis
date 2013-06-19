@@ -102,12 +102,12 @@ class Client(RedisCommandsMixin):
         self._stream.write(self.format_message(args))
         cb = callback
         if callback is not None:
+            @stack_context.wrap
             @wraps(callback)
             def cb(resp):
                 if isinstance(resp, Exception):
                     raise resp
                 callback(resp)
-            cb = stack_context.wrap(cb)
         self.callbacks.append(cb)
 
     def format_message(self, args):
@@ -196,6 +196,8 @@ class Client(RedisCommandsMixin):
                             callback(resp)
                         except:
                             logger.exception('Callback failed')
+                    elif isinstance(resp, Exception):
+                        logger.error(resp)
                 else:
                     logger.debug('Ignored response: %s' % repr(resp))
 
