@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+#TODO: improve for using new commands.json
+
 
 import json
 import os
