@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-#TODO: improve for using new commands.json
-
-
 import json
 import os
 
@@ -176,18 +173,19 @@ def parse_arguments(command, arguments):
             doc.append(':param %s:' % name)
         else:
             name = argname(arg['name'])
-            code.append('args.append(%s)' % name)
             if arg.get('optional') == True:
                 args.append('%s=None' % name)
+                prefix = '    '
+                code.append('if %s is not None:' % name)
             else:
                 args.append(name)
+                prefix = ''
+            code.append(prefix + 'args.append(%s)' % name)
+
             doc.append(':param %s:' % name)
 
     args.append('callback=None')
-    if len(code) > 1:
-        code.append('self.send_message(args, callback)')
-    else:
-        code = ['self.send_message(["%s"], callback)' % command]
+    code.append('self.send_message(args, callback)')
     return args, doc, code
 
 

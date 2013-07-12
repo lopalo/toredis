@@ -33,13 +33,15 @@ class RedisCommandsMixin(object):
         """
         Asynchronously rewrite the append-only file
         """
-        self.send_message(["BGREWRITEAOF"], callback)
+        args = ["BGREWRITEAOF"]
+        self.send_message(args, callback)
 
     def bgsave(self, callback=None):
         """
         Asynchronously save the dataset to disk
         """
-        self.send_message(["BGSAVE"], callback)
+        args = ["BGSAVE"]
+        self.send_message(args, callback)
 
     def bitcount(self, key, start=None, end=None, callback=None):
         """
@@ -55,8 +57,10 @@ class RedisCommandsMixin(object):
         """
         args = ["BITCOUNT"]
         args.append(key)
-        args.append(start)
-        args.append(end)
+        if start is not None:
+            args.append(start)
+        if end is not None:
+            args.append(end)
         self.send_message(args, callback)
 
     def bitop(self, operation, destkey, keys, callback=None):
@@ -142,6 +146,17 @@ class RedisCommandsMixin(object):
         args.append(timeout)
         self.send_message(args, callback)
 
+    def client_getname(self, callback=None):
+        """
+        Get the current connection name
+
+        Complexity
+        ----------
+        O(1)
+        """
+        args = ['CLIENT', 'GETNAME']
+        self.send_message(args, callback)
+
     def client_kill(self, ip_port, callback=None):
         """
         Kill the connection of a client
@@ -164,7 +179,22 @@ class RedisCommandsMixin(object):
         ----------
         O(N) where N is the number of client connections
         """
-        self.send_message(["CLIENT LIST"], callback)
+        args = ['CLIENT', 'LIST']
+        self.send_message(args, callback)
+
+    def client_setname(self, connection_name, callback=None):
+        """
+        Set the current connection name
+
+            :param connection_name:
+
+        Complexity
+        ----------
+        O(1)
+        """
+        args = ['CLIENT', 'SETNAME']
+        args.append(connection_name)
+        self.send_message(args, callback)
 
     def config_get(self, parameter, callback=None):
         """
@@ -184,7 +214,8 @@ class RedisCommandsMixin(object):
         ----------
         O(1)
         """
-        self.send_message(["CONFIG RESETSTAT"], callback)
+        args = ['CONFIG', 'RESETSTAT']
+        self.send_message(args, callback)
 
     def config_set(self, parameter, value, callback=None):
         """
@@ -202,7 +233,8 @@ class RedisCommandsMixin(object):
         """
         Return the number of keys in the selected database
         """
-        self.send_message(["DBSIZE"], callback)
+        args = ["DBSIZE"]
+        self.send_message(args, callback)
 
     def debug_object(self, key, callback=None):
         """
@@ -218,7 +250,8 @@ class RedisCommandsMixin(object):
         """
         Make the server crash
         """
-        self.send_message(["DEBUG SEGFAULT"], callback)
+        args = ['DEBUG', 'SEGFAULT']
+        self.send_message(args, callback)
 
     def decr(self, key, callback=None):
         """
@@ -276,7 +309,8 @@ class RedisCommandsMixin(object):
         """
         Discard all commands issued after MULTI
         """
-        self.send_message(["DISCARD"], callback)
+        args = ["DISCARD"]
+        self.send_message(args, callback)
 
     def dump(self, key, callback=None):
         """
@@ -369,7 +403,8 @@ class RedisCommandsMixin(object):
         """
         Execute all commands issued after MULTI
         """
-        self.send_message(["EXEC"], callback)
+        args = ["EXEC"]
+        self.send_message(args, callback)
 
     def exists(self, key, callback=None):
         """
@@ -421,13 +456,15 @@ class RedisCommandsMixin(object):
         """
         Remove all keys from all databases
         """
-        self.send_message(["FLUSHALL"], callback)
+        args = ["FLUSHALL"]
+        self.send_message(args, callback)
 
     def flushdb(self, callback=None):
         """
         Remove all keys from the current database
         """
-        self.send_message(["FLUSHDB"], callback)
+        args = ["FLUSHDB"]
+        self.send_message(args, callback)
 
     def get(self, key, callback=None):
         """
@@ -761,11 +798,16 @@ class RedisCommandsMixin(object):
         args.append(increment)
         self.send_message(args, callback)
 
-    def info(self, callback=None):
+    def info(self, section=None, callback=None):
         """
         Get information and statistics about the server
+
+            :param section:
         """
-        self.send_message(["INFO"], callback)
+        args = ["INFO"]
+        if section is not None:
+            args.append(section)
+        self.send_message(args, callback)
 
     def keys(self, pattern, callback=None):
         """
@@ -787,7 +829,8 @@ class RedisCommandsMixin(object):
         """
         Get the UNIX time stamp of the last successful save to disk
         """
-        self.send_message(["LASTSAVE"], callback)
+        args = ["LASTSAVE"]
+        self.send_message(args, callback)
 
     def lindex(self, key, index, callback=None):
         """
@@ -1015,7 +1058,8 @@ class RedisCommandsMixin(object):
         """
         Listen for all requests received by the server in real time
         """
-        self.send_message(["MONITOR"], callback)
+        args = ["MONITOR"]
+        self.send_message(args, callback)
 
     def move(self, key, db, callback=None):
         """
@@ -1071,7 +1115,8 @@ class RedisCommandsMixin(object):
         """
         Mark the start of a transaction block
         """
-        self.send_message(["MULTI"], callback)
+        args = ["MULTI"]
+        self.send_message(args, callback)
 
     def object(self, subcommand, argumentss=[], callback=None):
         """
@@ -1144,7 +1189,8 @@ class RedisCommandsMixin(object):
         """
         Ping the server
         """
-        self.send_message(["PING"], callback)
+        args = ["PING"]
+        self.send_message(args, callback)
 
     def psetex(self, key, milliseconds, value, callback=None):
         """
@@ -1215,6 +1261,29 @@ class RedisCommandsMixin(object):
         args.append(message)
         self.send_message(args, callback)
 
+    def pubsub(self, subcommand, arguments=[], callback=None):
+        """
+        Inspect the state of the Pub/Sub subsystem
+
+            :param subcommand:
+            :param arguments:
+                string or list of strings
+
+        Complexity
+        ----------
+        O(N) for the CHANNELS subcommand, where N is the number of active
+        channels, and assuming constant time pattern matching (relatively
+        short channels and patterns). O(N) for the NUMSUB subcommand, where N
+        is the number of requested channels. O(1) for the NUMPAT subcommand.
+        """
+        args = ["PUBSUB"]
+        args.append(subcommand)
+        if not isinstance(arguments, (list, tuple)):
+            args.append(arguments)
+        else:
+            args.extend(arguments)
+        self.send_message(args, callback)
+
     def punsubscribe(self, patterns=[], callback=None):
         """
         Stop listening for messages posted to channels matching the given
@@ -1240,7 +1309,8 @@ class RedisCommandsMixin(object):
         """
         Close the connection
         """
-        self.send_message(["QUIT"], callback)
+        args = ["QUIT"]
+        self.send_message(args, callback)
 
     def randomkey(self, callback=None):
         """
@@ -1250,7 +1320,8 @@ class RedisCommandsMixin(object):
         ----------
         O(1)
         """
-        self.send_message(["RANDOMKEY"], callback)
+        args = ["RANDOMKEY"]
+        self.send_message(args, callback)
 
     def rename(self, key, newkey, callback=None):
         """
@@ -1399,7 +1470,8 @@ class RedisCommandsMixin(object):
         """
         Synchronously save the dataset to disk
         """
-        self.send_message(["SAVE"], callback)
+        args = ["SAVE"]
+        self.send_message(args, callback)
 
     def scard(self, key, callback=None):
         """
@@ -1442,7 +1514,8 @@ class RedisCommandsMixin(object):
         ----------
         O(N) with N being the number of scripts in cache
         """
-        self.send_message(["SCRIPT FLUSH"], callback)
+        args = ['SCRIPT', 'FLUSH']
+        self.send_message(args, callback)
 
     def script_kill(self, callback=None):
         """
@@ -1452,7 +1525,8 @@ class RedisCommandsMixin(object):
         ----------
         O(1)
         """
-        self.send_message(["SCRIPT KILL"], callback)
+        args = ['SCRIPT', 'KILL']
+        self.send_message(args, callback)
 
     def script_load(self, script, callback=None):
         """
@@ -1516,12 +1590,15 @@ class RedisCommandsMixin(object):
         args.append(index)
         self.send_message(args, callback)
 
-    def set(self, key, value, callback=None):
+    def set(self, key, value, ex=None, px=None, condition=None, callback=None):
         """
         Set the string value of a key
 
             :param key:
             :param value:
+            :param ex:
+            :param px:
+            :param condition:
 
         Complexity
         ----------
@@ -1530,6 +1607,14 @@ class RedisCommandsMixin(object):
         args = ["SET"]
         args.append(key)
         args.append(value)
+        if ex:
+            args.append("EX")
+            args.append(ex)
+        if px:
+            args.append("PX")
+            args.append(px)
+        if condition is not None:
+            args.append(condition)
         self.send_message(args, callback)
 
     def setbit(self, key, offset, value, callback=None):
@@ -1696,7 +1781,8 @@ class RedisCommandsMixin(object):
         """
         args = ["SLOWLOG"]
         args.append(subcommand)
-        args.append(argument)
+        if argument is not None:
+            args.append(argument)
         self.send_message(args, callback)
 
     def smembers(self, key, callback=None):
@@ -1763,7 +1849,8 @@ class RedisCommandsMixin(object):
         for pattern in get:
             args.append("GET")
             args.append(pattern)
-        args.append(order)
+        if order is not None:
+            args.append(order)
         if sorting:
             args.append("ALPHA")
         if store:
@@ -1799,7 +1886,8 @@ class RedisCommandsMixin(object):
         """
         args = ["SRANDMEMBER"]
         args.append(key)
-        args.append(count)
+        if count is not None:
+            args.append(count)
         self.send_message(args, callback)
 
     def srem(self, key, members, callback=None):
@@ -1896,7 +1984,8 @@ class RedisCommandsMixin(object):
         """
         Internal command used for replication
         """
-        self.send_message(["SYNC"], callback)
+        args = ["SYNC"]
+        self.send_message(args, callback)
 
     def time(self, callback=None):
         """
@@ -1906,7 +1995,8 @@ class RedisCommandsMixin(object):
         ----------
         O(1)
         """
-        self.send_message(["TIME"], callback)
+        args = ["TIME"]
+        self.send_message(args, callback)
 
     def ttl(self, key, callback=None):
         """
@@ -1962,7 +2052,8 @@ class RedisCommandsMixin(object):
         ----------
         O(1)
         """
-        self.send_message(["UNWATCH"], callback)
+        args = ["UNWATCH"]
+        self.send_message(args, callback)
 
     def watch(self, keys, callback=None):
         """
