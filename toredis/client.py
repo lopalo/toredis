@@ -235,6 +235,7 @@ class Client(RedisCommandsMixin):
 
 
 class ClientPool(RedisCommandsMixin):
+    #TODO: improve (taking a client from the pool to make transaction)
 
     client_cls = Client
 

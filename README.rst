@@ -31,9 +31,8 @@ Key design points:
 
 4. Toredis does not provide reconnection feature, but you can override :meth:`~toredis.Client.on_disconnect` method and implement your reconnection logic.
 
-You can find command `documentation here <https://github.com/mrjoes/toredis/blob/master/toredis/commands.py>`_ (will be moved to rtd later).
+You can find command `documentation here <https://github.com/lopalo/toredis/blob/master/toredis/commands.py>`_ (will be moved to rtd later).
 
 Things missing:
 
 * Backport pure-python redis protocol parser (for PyPy support)
-* Connection pools
